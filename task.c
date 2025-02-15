@@ -6,7 +6,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    NUMBERS inputNumbers;  // Используем структуру напрямую, а не указатель
+    NUMBERS inputNumbers;
     char *filename = argv[1];
     FILE *file = fopen(filename, "wb");
     if (!file) {
@@ -22,13 +22,16 @@ int main(int argc, char *argv[]) {
     fromCharToInt(lineNum, &inputNumbers);
 
     int cout = fwrite(inputNumbers.numberInLine, sizeof(int), inputNumbers.coutNum, file);
-    printf("Вписал: %d чисел\n", cout);
 
     fclose(file);
 
     printf("Искомый элемент в задании 2: %d\n", findTask(filename, &inputNumbers));
 
-    // Освобождение памяти
+    swapNeighInFile(filename, &inputNumbers);
+
+    printf("После обмена:\n");
+    printFile(filename);
+
     free(lineNum);
     free(inputNumbers.numberInLine);
 

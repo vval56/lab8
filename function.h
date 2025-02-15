@@ -85,7 +85,7 @@ int findTask(char *filename, NUMBERS *num) {
         return -1;
     }
 
-    int cout = fread(buff, sizeof(int), num->coutNum, file);
+    fread(buff, sizeof(int), num->coutNum, file);
     fclose(file);
 
     minMultip = buff[0] * buff[1];
@@ -101,4 +101,46 @@ int findTask(char *filename, NUMBERS *num) {
 
     free(buff);
     return coutMin;
+}
+
+void swapNeighInFile(char *filename, NUMBERS *num){
+    FILE *file = fopen(filename, "r+b");
+    if (file == NULL) {
+        printf("Ошибка при открытии файла для чтения/записи!\n");
+        return;
+    }
+
+    int num1, num2;
+
+    for (int i = 0; i < num->coutNum - 1; i += 2) {
+        fseek(file, i * sizeof(int), SEEK_SET);
+        fread(&num1, sizeof(int), 1, file);
+
+        fseek(file, (i + 1) * sizeof(int), SEEK_SET);
+        fread(&num2, sizeof(int), 1, file);
+
+        fseek(file, i * sizeof(int), SEEK_SET);
+        fwrite(&num2, sizeof(int), 1, file);
+
+        fseek(file, (i + 1) * sizeof(int), SEEK_SET);
+        fwrite(&num1, sizeof(int), 1, file);
+    }
+
+    fclose(file);
+}
+
+void printFile(const char *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (!file) {
+        printf("Ошибка при открытии файла.\n");
+        return;
+    }
+
+    int value;
+    while (fread(&value, sizeof(int), 1, file) == 1) {
+        printf("%d ", value);
+    }
+    printf("\n");
+
+    fclose(file);
 }
