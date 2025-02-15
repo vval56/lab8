@@ -33,6 +33,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    int coutOfNumbers = 1;
+
     char *filename = argv[1];
     FILE *file = fopen(filename, "wb");
     if (!file) {
@@ -44,6 +46,8 @@ int main(int argc, char *argv[]) {
 
     puts("Введите числа:");
     inputLine(&lineNum);
+
+    fwrite(lineNum, sizeof(lineNum), coutOfNumbers, file);
 
     free(lineNum);
     fclose(file);
