@@ -1,31 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-int checkNumValue(char * line){
-    int i = 0;
-    while(line[i] != '\0' && line[i] != '\n'){
-        if (!((line[i] >= '0' && line[i] <= '9') || line[i] == ' ')) {
-            puts("Неверный ввод");
-            return 0;
-        }
-        i++;
-    }
-    return 1;
-}
-
-void inputLine(char ** line){
-    do{
-        int read = 0;
-        size_t n = 0;
-
-        read = getline(line, &n, stdin);
-        if(read == -1){
-            puts("Ошибка выделенной памяти");
-            continue;
-        }
-
-    }while(checkNumValue(*line) == 0);
-}
+#include "function.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -33,8 +6,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int coutOfNumbers = 1;
-
+    NUMBERS inputNumbers;  // Используем структуру напрямую, а не указатель
     char *filename = argv[1];
     FILE *file = fopen(filename, "wb");
     if (!file) {
@@ -47,9 +19,18 @@ int main(int argc, char *argv[]) {
     puts("Введите числа:");
     inputLine(&lineNum);
 
-    fwrite(lineNum, sizeof(lineNum), coutOfNumbers, file);
+    fromCharToInt(lineNum, &inputNumbers);
 
-    free(lineNum);
+    int cout = fwrite(inputNumbers.numberInLine, sizeof(int), inputNumbers.coutNum, file);
+    printf("Вписал: %d чисел\n", cout);
+
     fclose(file);
+
+    printf("Искомый элемент в задании 2: %d\n", findTask(filename, &inputNumbers));
+
+    // Освобождение памяти
+    free(lineNum);
+    free(inputNumbers.numberInLine);
+
     return 0;
 }
