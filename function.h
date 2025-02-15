@@ -55,7 +55,7 @@ void fromCharToInt(char *line, NUMBERS *num) {
             num->numberInLine = (int *)realloc(num->numberInLine, sizeof(int) * (num->coutNum + 1));
             if (!num->numberInLine) {
                 puts("Ошибка выделения памяти!\n");
-                exit(1);
+                exit(0);
             }
 
             num->numberInLine[num->coutNum] = value;
@@ -68,21 +68,21 @@ void fromCharToInt(char *line, NUMBERS *num) {
 int findTask(char *filename, NUMBERS *num) {
     if (num->coutNum < 2) {
         puts("Недостаточно данных для вычисления!");
-        return -1;
+        exit(0);
     }
 
     int minMultip = 0;
     int *buff = (int *)malloc(sizeof(int) * num->coutNum);
     if (!buff) {
         puts("Ошибка выделения памяти!");
-        return -1;
+        exit(0);
     }
 
     FILE *file = fopen(filename, "rb");
     if (!file) {
         puts("Ошибка при открытии файла для чтения!");
         free(buff);
-        return -1;
+        exit(0);
     }
 
     fread(buff, sizeof(int), num->coutNum, file);
@@ -106,8 +106,8 @@ int findTask(char *filename, NUMBERS *num) {
 void swapNeighInFile(char *filename, NUMBERS *num){
     FILE *file = fopen(filename, "r+b");
     if (file == NULL) {
-        printf("Ошибка при открытии файла для чтения/записи!\n");
-        return;
+        puts("Ошибка при открытии файла для чтения/записи!");
+        exit(0);
     }
 
     int num1, num2;
@@ -132,8 +132,8 @@ void swapNeighInFile(char *filename, NUMBERS *num){
 void printFile(const char *filename) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
-        printf("Ошибка при открытии файла.\n");
-        return;
+        puts("Ошибка при открытии файла.");
+        exit(0);
     }
 
     int value;
@@ -143,4 +143,44 @@ void printFile(const char *filename) {
     printf("\n");
 
     fclose(file);
+}
+
+void deleteMultipFive(const char *filename, NUMBERS *num){
+    FILE *file = fopen(filename, "rb");
+    if (!file) {
+        puts("Ошибка при открытии файла для чтения!");
+        return;
+    }
+
+    int *data = (int *)malloc(sizeof(int) * num->coutNum);
+    if (!data) {
+        puts("Ошибка выделения памяти!");
+        fclose(file);
+        return;
+    }
+
+    fread(data, sizeof(int), num->coutNum, file);
+    fclose(file);
+
+    int newCount = 0;
+    for (int i = 0; i < num->coutNum; i++) {
+        if (data[i] % 5 != 0) {
+            data[newCount] = data[i];
+            newCount++;
+        }
+    }
+
+    file = fopen(filename, "wb");
+    if (!file) {
+        puts("Ошибка при открытии файла для записи!");
+        free(data);
+        return;
+    }
+
+    fwrite(data, sizeof(int), newCount, file);
+    fclose(file);
+
+    num->coutNum = newCount + 1;
+
+    free(data);
 }

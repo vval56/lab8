@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 
     fromCharToInt(lineNum, &inputNumbers);
 
-    int cout = fwrite(inputNumbers.numberInLine, sizeof(int), inputNumbers.coutNum, file);
+    fwrite(inputNumbers.numberInLine, sizeof(int), inputNumbers.coutNum, file);
 
     fclose(file);
 
@@ -29,7 +29,11 @@ int main(int argc, char *argv[]) {
 
     swapNeighInFile(filename, &inputNumbers);
 
-    printf("После обмена:\n");
+    puts("После обмена:");
+    printFile(filename);
+
+    puts("Удаление всех чисел, кратных 5:");
+    deleteMultipFive(filename,&inputNumbers);
     printFile(filename);
 
     free(lineNum);
