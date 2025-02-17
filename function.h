@@ -6,12 +6,16 @@ typedef struct {
     int coutNum;
 } NUMBERS;
 
-// Проверка корректности ввода (только цифры и пробелы)
 int checkNumValue(char *line) {
     int i = 0;
     while (line[i] != '\0' && line[i] != '\n') {
-        if (!((line[i] >= '0' && line[i] <= '9') || line[i] == ' ')) {
+        if (!((line[i] >= '0' && line[i] <= '9') || line[i] == ' ' || line[i] == '-')) {
             puts("Неверный ввод");
+            return 0;
+        }
+
+        if (line[i] == '-' && !(line[i+1] >= '0' && line[i+1] <= '9')) {
+            puts("Неверный ввод: минус должен стоять перед числом");
             return 0;
         }
         i++;
@@ -45,12 +49,20 @@ void fromCharToInt(char *line, NUMBERS *num) {
             i++;
         }
 
-        if (line[i] >= '0' && line[i] <= '9') {
+        if (line[i] == '-' || (line[i] >= '0' && line[i] <= '9')) {
+            int sign = 1;
+            if (line[i] == '-') {
+                sign = -1;
+                i++;
+            }
+
             value = 0;
             while (line[i] >= '0' && line[i] <= '9') {
                 value = value * 10 + (line[i] - '0');
                 i++;
             }
+
+            value *= sign;
 
             num->numberInLine = (int *)realloc(num->numberInLine, sizeof(int) * (num->coutNum + 1));
             if (!num->numberInLine) {
@@ -184,3 +196,4 @@ void deleteMultipFive(const char *filename, NUMBERS *num){
 
     free(data);
 }
+
