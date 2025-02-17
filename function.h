@@ -23,7 +23,6 @@ int checkNumValue(char *line) {
     return 1;
 }
 
-// Ввод строки с числами
 void inputLine(char **line) {
     do {
         int read = 0;
@@ -38,7 +37,6 @@ void inputLine(char **line) {
     } while (checkNumValue(*line) == 0);
 }
 
-// Преобразование строки в массив чисел
 void fromCharToInt(char *line, NUMBERS *num) {
     int i = 0, value = 0;
     num->coutNum = 0;
@@ -76,7 +74,6 @@ void fromCharToInt(char *line, NUMBERS *num) {
     }
 }
 
-// Поиск минимального произведения соседних чисел
 int findTask(char *filename, NUMBERS *num) {
     if (num->coutNum < 2) {
         puts("Недостаточно данных для вычисления!");
