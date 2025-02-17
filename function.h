@@ -95,7 +95,7 @@ int findTask(char *filename, NUMBERS *num) {
     }
 
     fread(buff, sizeof(int), num->coutNum, file);
-    fclose(file);
+    fclose(file);лемент в задании 2: 1
 
     minMultip = buff[0] * buff[1];
     int coutMin = 1;
