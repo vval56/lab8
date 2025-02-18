@@ -68,8 +68,7 @@ void fromCharToInt(char *line, NUMBERS *num) {
                 exit(0);
             }
 
-            num->numberInLine[num->coutNum] = value;
-            num->coutNum++;
+            num->numberInLine[num->coutNum++] = value;
         }
     }
 }
@@ -95,7 +94,7 @@ int findTask(char *filename, NUMBERS *num) {
     }
 
     fread(buff, sizeof(int), num->coutNum, file);
-    fclose(file);лемент в задании 2: 1
+    fclose(file);
 
     minMultip = buff[0] * buff[1];
     int coutMin = 1;
