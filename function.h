@@ -1,117 +1,136 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
 
-typedef struct {
-    int *numberInLine;
-    int coutNum;
-} NUMBERS;
+#define SIZE_BUFFER 256
 
-int checkNumValue(char *line) {
-    int i = 0;
-    while (line[i] != '\0' && line[i] != '\n') {
-        if (!((line[i] >= '0' && line[i] <= '9') || line[i] == ' ' || line[i] == '-')) {
-            puts("Неверный ввод");
-            return 0;
-        }
+int input(){
+  	char s[20];
+  	int i = 0;
 
-        if (line[i] == '-' && !(line[i+1] >= '0' && line[i+1] <= '9')) {
-            puts("Неверный ввод: минус должен стоять перед числом");
-            return 0;
-        }
-        i++;
+  	while (1) {
+        s[i] = getchar();
+        if(s[i] == 10) break;
+        if(s[i] >= '0' && s[i] <= '9'){	
+            i++;
+		}
+  	}
+
+  	s[i] = '\0';
+
+  	return atoi(s);
+}
+
+int my_isdigit(char symbol) {
+    return (symbol >= '0' && symbol <= '9') ? 1 : 0;
+}
+
+int is_line_empty(const char *line) {
+    for (int i = 0; line[i]; i++) {
+        if (!isspace(line[i])) return 0; 
     }
     return 1;
 }
 
-void inputLine(char **line) {
-    do {
-        int read = 0;
-        size_t n = 0;
+int input_int_numbers(int **numbers, int * size){
+    int empty_lines = 0;
+    char input[SIZE_BUFFER];
 
-        read = getline(line, &n, stdin);
-        if (read == -1) {
-            puts("Ошибка выделения памяти");
+    *numbers = NULL;
+
+    while (empty_lines < 2) {
+        
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            puts("Ошибка чтения строки");
+            return 0;
+        }
+
+        if (is_line_empty(input)) {
+            empty_lines++;
             continue;
+        } else {
+            empty_lines = 0;
         }
 
-    } while (checkNumValue(*line) == 0);
-}
+        int i = 0;
+        while (input[i] != '\0') {
+            while (input[i] == ' ') i++;
 
-void fromCharToInt(char *line, NUMBERS *num) {
-    int i = 0, value = 0;
-    num->coutNum = 0;
-    num->numberInLine = NULL;
-
-    while (line[i] != '\0' && line[i] != '\n') {
-        while (line[i] == ' ') {
-            i++;
-        }
-
-        if (line[i] == '-' || (line[i] >= '0' && line[i] <= '9')) {
             int sign = 1;
-            if (line[i] == '-') {
+            int value = 0;
+
+            if (input[i] == '-') {
                 sign = -1;
                 i++;
             }
 
-            value = 0;
-            while (line[i] >= '0' && line[i] <= '9') {
-                value = value * 10 + (line[i] - '0');
+            if (!my_isdigit(input[i])) {
+                if (input[i] != '\0' && input[i] != '\n') {
+                    printf("Ошибка: недопустимый символ '%c'\n", input[i]);
+                    return 0;
+                }
+                break;
+            }
+
+            while (my_isdigit(input[i])) {
+                value = value * 10 + (input[i] - '0');
                 i++;
             }
 
             value *= sign;
 
-            num->numberInLine = (int *)realloc(num->numberInLine, sizeof(int) * (num->coutNum + 1));
-            if (!num->numberInLine) {
-                puts("Ошибка выделения памяти!\n");
-                exit(0);
+            int *temp = realloc(*numbers, sizeof(int) * (*size + 1));
+            if (!temp) {
+                puts("Ошибка выделения памяти");
+                free(*numbers);
+                return 0;
             }
 
-            num->numberInLine[num->coutNum++] = value;
+            *numbers = temp;
+            (*numbers)[(*size)++] = value;
         }
-    }
+    }   
+
+    return 1;
 }
 
-int findTask(char *filename, NUMBERS *num) {
-    if (num->coutNum < 2) {
+int find_task(const char *filename, int size) {
+    if (size < 2) {
         puts("Недостаточно данных для вычисления!");
-        exit(0);
-    }
-
-    int minMultip = 0;
-    int *buff = (int *)malloc(sizeof(int) * num->coutNum);
-    if (!buff) {
-        puts("Ошибка выделения памяти!");
-        exit(0);
+        return -1;
     }
 
     FILE *file = fopen(filename, "rb");
     if (!file) {
-        puts("Ошибка при открытии файла для чтения!");
-        free(buff);
-        exit(0);
+        puts("Ошибка открытия файла");
+        return -1;
     }
 
-    fread(buff, sizeof(int), num->coutNum, file);
-    fclose(file);
+    int prev, curr;
+    int min_product = __INT_MAX__;
+    int position = 0;
 
-    minMultip = buff[0] * buff[1];
-    int coutMin = 1;
+    fread(&prev, sizeof(int), 1, file);
 
-    for (int i = 2; i < num->coutNum; i++) {
-        int multipNeigh = buff[i] * buff[i - 1];
-        if (multipNeigh < minMultip) {
-            minMultip = multipNeigh;
-            coutMin = i + 1;
+    for (int i = 1; i < size; i++) {
+        fread(&curr, sizeof(int), 1, file);
+
+        int product = prev * curr;
+        if (product < min_product) {
+            min_product = product;
+            position = i + 1; 
         }
+
+        prev = curr;
     }
 
-    free(buff);
-    return coutMin;
+    fclose(file);
+    return position;
 }
 
-void swapNeighInFile(char *filename, NUMBERS *num){
+void swapNeighInFile(char *filename, int size){
     FILE *file = fopen(filename, "r+b");
     if (file == NULL) {
         puts("Ошибка при открытии файла для чтения/записи!");
@@ -120,7 +139,7 @@ void swapNeighInFile(char *filename, NUMBERS *num){
 
     int num1, num2;
 
-    for (int i = 0; i < num->coutNum - 1; i += 2) {
+    for (int i = 0; i < size - 1; i += 2) {
         fseek(file, i * sizeof(int), SEEK_SET);
         fread(&num1, sizeof(int), 1, file);
 
@@ -137,7 +156,7 @@ void swapNeighInFile(char *filename, NUMBERS *num){
     fclose(file);
 }
 
-void printFile(const char *filename) {
+void print_file(const char *filename) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
         puts("Ошибка при открытии файла.");
@@ -148,48 +167,45 @@ void printFile(const char *filename) {
     while (fread(&value, sizeof(int), 1, file) == 1) {
         printf("%d ", value);
     }
-    printf("\n");
+    puts("");
 
     fclose(file);
 }
 
-void deleteMultipFive(const char *filename, NUMBERS *num){
-    FILE *file = fopen(filename, "rb");
+void deleteMultipFive(const char *filename, int *size) {
+    FILE *file = fopen(filename, "r+b");
     if (!file) {
         puts("Ошибка при открытии файла для чтения!");
         return;
     }
 
-    int *data = (int *)malloc(sizeof(int) * num->coutNum);
-    if (!data) {
-        puts("Ошибка выделения памяти!");
-        fclose(file);
-        return;
-    }
+    int value;
+    int write_pos = 0; 
 
-    fread(data, sizeof(int), num->coutNum, file);
-    fclose(file);
+    for (int read_pos = 0; read_pos < *size; read_pos++) {
+        fseek(file, read_pos * sizeof(int), SEEK_SET);
+        fread(&value, sizeof(int), 1, file);
 
-    int newCount = 0;
-    for (int i = 0; i < num->coutNum; i++) {
-        if (data[i] % 5 != 0) {
-            data[newCount] = data[i];
-            newCount++;
+        if (value % 5 != 0) {
+            fseek(file, write_pos * sizeof(int), SEEK_SET);
+            fwrite(&value, sizeof(int), 1, file);
+            write_pos++;
         }
     }
 
-    file = fopen(filename, "wb");
-    if (!file) {
-        puts("Ошибка при открытии файла для записи!");
-        free(data);
-        return;
+    ftruncate(fileno(file), write_pos * sizeof(int));
+
+    if(write_pos == *size){
+        puts("Нету элементов, кратных 5");
     }
 
-    fwrite(data, sizeof(int), newCount, file);
+    if(write_pos == 0){
+        puts("Все числа кратны 5");
+    }
+    else{
+        printf("Удалено %d элементов, кратных 5\n", *size - write_pos);
+        *size = write_pos;
+    }
+
     fclose(file);
-
-    num->coutNum = newCount + 1;
-
-    free(data);
 }
-
