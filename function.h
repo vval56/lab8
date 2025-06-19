@@ -6,21 +6,45 @@
 
 #define SIZE_BUFFER 256
 
-int input(){
-  	char s[20];
-  	int i = 0;
+int input() {
+    char s[20];
+    int i = 0, valid = 1;
+    
+    do {
+        i = 0;
+        valid = 1;
+        
+        while (1) {
+            s[i] = getchar();
+            
+            if (s[i] == '\n') {
+                if (i == 0) {
+                    printf("Ошибка: пустой ввод. Попробуйте снова: ");
+                    valid = 0;
+                }
+                break;
+            }
 
-  	while (1) {
-        s[i] = getchar();
-        if(s[i] == 10) break;
-        if(s[i] >= '0' && s[i] <= '9'){	
-            i++;
-		}
-  	}
-
-  	s[i] = '\0';
-
-  	return atoi(s);
+            if (s[i] < '0' || s[i] > '9') {
+                valid = 0;
+            }
+            
+            if (++i >= 19) {
+                printf("Ошибка: слишком длинный ввод. Попробуйте снова: ");
+                while (getchar() != '\n');
+                valid = 0;
+                break;
+            }
+        }
+        
+        s[i] = '\0';
+        
+        if (!valid) {
+            printf("Ошибка: недопустимый ввод. Попробуйте снова: ");
+        }
+    } while (!valid);
+    
+    return atoi(s);
 }
 
 int my_isdigit(char symbol) {

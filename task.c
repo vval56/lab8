@@ -11,7 +11,7 @@ void show_menu(){
 
 void press_enter_to_continue() {
     printf("\nНажмите Enter для продолжения...");
-    getchar(); getchar(); // для считывания \n после scanf
+    getchar(); getchar();
 }
 
 int main(int argc, char *argv[]) {
